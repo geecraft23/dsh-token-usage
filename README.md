@@ -6,7 +6,7 @@ English · [简体中文](README.zh-CN.md)
 
 A standalone DeepSeek Harness plugin with persistent, cross-session accounting. Open **Settings → Token usage** to explore daily trends and usage by provider, model, and online/offline deployment.
 
-![Token usage dashboard](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/v0.1.0/docs/images/overview.png)
+![Token usage dashboard](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/main/docs/images/overview.png)
 
 > Screenshots show demonstration data in an isolated DSH instance, not measured model inference.
 
@@ -31,7 +31,7 @@ Install separately in other profiles by replacing `web`. Profiles sharing `DSH_H
 - **Durable local storage:** SQLite survives restarts and session deletion. Missing usage, failures, and unfinished requests remain visible.
 - **Native settings page:** English and Chinese copy, with DSH light/dark theme support.
 
-![Offline model filter](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/v0.1.0/docs/images/offline.png)
+![Offline model filter](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/main/docs/images/offline.png)
 
 ## Accounting and privacy
 

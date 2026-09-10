@@ -6,7 +6,7 @@
 
 这是 DeepSeek Harness 的独立插件。在 **设置 → Token 用量** 中查看跨会话累计、每日趋势，以及按服务和模型划分的线上／线下用量。
 
-![DSH Token 用量总览](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/v0.1.0/docs/images/overview.png)
+![DSH Token 用量总览](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/main/docs/images/overview.png)
 
 > 截图使用隔离环境中的演示数据，展示产品功能，不代表真实模型推理结果。
 
@@ -30,7 +30,7 @@ dsh plugin --profile web add @geecraft23/dsh-token-usage@0.1.0
 - **趋势与导出**：近 7 天、30 天、全部、自选日期和来源筛选，支持 JSON 导出。
 - **持久保存**：本地 SQLite；重启或删除会话不清空统计。可显示缺失上报、失败及未结束请求。
 
-![仅查看线下模型](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/v0.1.0/docs/images/offline.png)
+![仅查看线下模型](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/main/docs/images/offline.png)
 
 ## 数字代表什么
 
