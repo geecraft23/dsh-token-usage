@@ -2,7 +2,7 @@
 
 ## 0.2.0 — 2026-09-11
 
-- Lead with a refined 90-day activity grid, with a 30-day option, retain empty days in white, and format token counts with K/M/B and exact-value tooltips.
+- Lead with a refined 90-day activity grid, with a 30-day option, render empty days as soft gray-white rounded tiles without outlines, and format token counts with K/M/B and exact-value tooltips.
 - Separate deployment (Local / Cloud) from token direction (Input / Output).
 - Replace asymmetric cards with consistent totals and deployment comparisons.
 - Add an activity calendar, weekly and cumulative views, peak daily usage and active-day insights.
