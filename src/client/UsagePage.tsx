@@ -36,7 +36,7 @@ export function exportUsage(query: Query, report: Report): string {
 
 /** Render cumulative counters with explicit unknown-usage and classification states. */
 export function UsagePage({ t, call }: UsagePageProps) {
-  const [range, setRange] = useState('month'), [source, setSource] = useState('all')
+  const [range, setRange] = useState('quarter'), [source, setSource] = useState('all')
   const [from, setFrom] = useState(dateValue(new Date())), [to, setTo] = useState(dateValue(new Date()))
   const [route, setRoute] = useState('all')
   const [catalog, setCatalog] = useState<Report['models']>([])
@@ -76,7 +76,7 @@ export function UsagePage({ t, call }: UsagePageProps) {
   const stats = report ? insights(dailyRows(report)) : null
   return <section className="dsh-usage">
     <style>{css}</style>
-    <h2>{t('title')}</h2><p className="muted">{t('subtitle')}</p>
+    <h2>{t('activity')}</h2>
     <div className="toolbar">
       <select aria-label={t('period')} value={range} onChange={e => { setReport(null); setRange(e.target.value) }}>
         {(['month', 'quarter', 'allTime', 'custom'] as const).map(key => <option key={key} value={key}>{t(key)}</option>)}
@@ -96,7 +96,7 @@ export function UsagePage({ t, call }: UsagePageProps) {
     {report?.storageError && <p className="notice" role="alert">{t('storageError')}</p>}
     {!report && !error && <p className="empty">{t('loading')}</p>}
     {report && <>
-      <p className="muted">{t('periodHint')}</p>
+      <Activity report={report} query={query()} t={t} />
       <div className="totals-strip">
         {(['totalTokens', 'inputTokens', 'outputTokens'] as const).map((key, i) => <div key={key}><strong><TokenValue value={report.totals[key]} /></strong><span>{t((['total', 'input', 'output'] as const)[i]!)}</span></div>)}
       </div>
@@ -106,7 +106,6 @@ export function UsagePage({ t, call }: UsagePageProps) {
         <div><strong>{stats!.longest} {t('days')}</strong><span>{t('streak')}</span></div>
         <div><strong>{number(report.totals.requests)}</strong><span>{t('requests')}</span></div>
       </div>
-      <Activity report={report} query={query()} t={t} />
       {report.totals.requests === 0 ? <p className="empty">{t('empty')}</p> : <>
         <h3>{t('deployments')}</h3>
         <div className="table-wrap"><table><thead><tr><th>{t('source')}</th><th className="num">{t('input')}</th><th className="num">{t('output')}</th><th className="num">{t('totalColumn')}</th></tr></thead><tbody>
@@ -122,7 +121,7 @@ export function UsagePage({ t, call }: UsagePageProps) {
           </tr>)}
         </tbody></table></div>
       </>}
-      <details><summary>{t('details')}</summary><p>{t('localHint')}</p><div className="coverage"><span>{number(report.totals.requests)} {t('requests')}</span><span>{number(report.totals.reportedRequests)} {t('reported')}</span><span>{number(report.totals.missingRequests)} {t('missing')}</span><span>{number(report.totals.openRequests)} {t('open')}</span><span>{number(report.totals.failedRequests)} {t('failed')}</span>{report.totals.invalidRequests > 0 && <span>{number(report.totals.invalidRequests)} {t('invalid')}</span>}</div>
+      <details><summary>{t('details')}</summary><p>{t('subtitle')}</p><p>{t('periodHint')}</p><p>{t('heatHint')}</p><p>{t('localHint')}</p><div className="coverage"><span>{number(report.totals.requests)} {t('requests')}</span><span>{number(report.totals.reportedRequests)} {t('reported')}</span><span>{number(report.totals.missingRequests)} {t('missing')}</span><span>{number(report.totals.openRequests)} {t('open')}</span><span>{number(report.totals.failedRequests)} {t('failed')}</span>{report.totals.invalidRequests > 0 && <span>{number(report.totals.invalidRequests)} {t('invalid')}</span>}</div>
       <p className="muted">{t('since')} {new Date(report.trackingSince).toLocaleString()} · {t('timezone')} UTC{new Date().getTimezoneOffset() > 0 ? '−' : '+'}{Math.abs(new Date().getTimezoneOffset()) / 60}</p>
       <p>{t('accounting')}</p><p>{t('missingHint')}</p><p>{t('scope')}</p><p>{t('auxiliary')}</p><p>{t('cached')} {report.totals.cacheReadReports ? <TokenValue value={report.totals.cacheReadTokens} /> : '—'} · {t('cacheWrite')} {report.totals.cacheWriteReports ? <TokenValue value={report.totals.cacheWriteTokens} /> : '—'} · {t('reasoning')} {report.totals.reasoningReports ? <TokenValue value={report.totals.reasoningTokens} /> : '—'}</p></details>
     </>}

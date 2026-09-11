@@ -63,15 +63,15 @@ it('exports local/cloud deployment names and keeps exact input/output counters',
 })
 
 
-it('renders 30 empty days by default and 90 days when selected', async () => {
+it('renders 90 empty days by default and 30 days when selected', async () => {
   const ledger = new Ledger(':memory:', [], Date.now())
   const call = async (_: string, payload: unknown) => ledger.report(payload as import('../src/types.js').Query)
   const { container } = render(<UsagePage t={key => zh[key]} call={call} />)
   await screen.findByText('这个时间范围内还没有模型请求。')
-  expect(container.querySelectorAll('.calendar .day')).toHaveLength(30)
-  expect(container.querySelectorAll('.calendar .level-0')).toHaveLength(30)
-  fireEvent.change(screen.getByRole('combobox', { name: '时间范围' }), { target: { value: 'quarter' } })
-  await waitFor(() => expect(container.querySelectorAll('.calendar .day')).toHaveLength(90))
+  expect(container.querySelectorAll('.calendar .day')).toHaveLength(90)
+  expect(container.querySelectorAll('.calendar .level-0')).toHaveLength(90)
+  fireEvent.change(screen.getByRole('combobox', { name: '时间范围' }), { target: { value: 'month' } })
+  await waitFor(() => expect(container.querySelectorAll('.calendar .day')).toHaveLength(30))
   ledger.close()
 })
 
@@ -80,8 +80,8 @@ it('keeps inactive dates and grades active dates against the selected peak', asy
   for (const [i, inputTokens] of [100, 400, 0].entries()) ledger.put({ id: String(i), startedAt: Date.now() - i * 86400000, updatedAt: Date.now(), provider: 'test', model: 'test', sessionId: null, purpose: 'conversation', status: 'stop', invalidUsage: false, usage: { inputTokens, outputTokens: 0 } })
   const { container } = render(<UsagePage t={key => zh[key]} call={async (_, payload) => ledger.report(payload as import('../src/types.js').Query)} />)
   await screen.findByText('按部署位置')
-  expect(container.querySelectorAll('.calendar .day')).toHaveLength(30)
-  expect(container.querySelectorAll('.calendar .level-0')).toHaveLength(27)
+  expect(container.querySelectorAll('.calendar .day')).toHaveLength(90)
+  expect(container.querySelectorAll('.calendar .level-0')).toHaveLength(87)
   expect(container.querySelectorAll('.calendar .level-1')).toHaveLength(2)
   expect(container.querySelectorAll('.calendar .level-4')).toHaveLength(1)
   expect(container.querySelector('.token-value')?.getAttribute('title')).toBe('500')

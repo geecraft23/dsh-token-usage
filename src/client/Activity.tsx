@@ -17,18 +17,17 @@ export function Activity({ report, query, t }: { report: Report; query: Query; t
   const first = cells.find(Boolean)?.day, last = cells.findLast(Boolean)?.day
   const label = metric === 'inputTokens' ? t('input') : metric === 'outputTokens' ? t('output') : t('totalColumn')
   return <div className="activity">
-    <div className="section-heading"><h3>{t('activity')}</h3><select aria-label={t('metric')} value={metric} onChange={e => setMetric(e.target.value as Metric)}>
-      <option value="totalTokens">{t('totalColumn')}</option><option value="inputTokens">{t('input')}</option><option value="outputTokens">{t('output')}</option>
-    </select></div>
-    <div className="view-tabs" role="group" aria-label={t('activity')}>{(['daily', 'weekly', 'cumulative'] as const).map(key => <button key={key} aria-pressed={mode === key} onClick={() => setMode(key)}>{t(key)}</button>)}</div>
+    <div className="activity-controls">
+      <div className="view-tabs" role="group" aria-label={t('activity')}>{(['daily', 'weekly', 'cumulative'] as const).map(key => <button key={key} aria-pressed={mode === key} onClick={() => setMode(key)}>{t(key)}</button>)}</div>
+      <select aria-label={t('metric')} value={metric} onChange={e => setMetric(e.target.value as Metric)}><option value="totalTokens">{t('totalColumn')}</option><option value="inputTokens">{t('input')}</option><option value="outputTokens">{t('output')}</option></select>
+    </div>
     {mode === 'daily' ? <>
-      <div className="calendar-scroll"><div className="calendar" style={{ gridTemplateColumns: `repeat(${cells.length <= 90 ? 15 : 30}, minmax(0, 1fr))` }}>
+      <div className="calendar-scroll"><div className="calendar">
         {cells.map((day, i) => day ? <button key={day.day} className={`day level-${day.requests === 0 ? 0 : Math.max(1, Math.min(4, Math.ceil(day[metric] / max * 4)))}`} aria-label={`${day.day} · ${label} ${format(day[metric])} · ${t('requests')} ${day.requests}`} title={`${day.day}\n${t('input')}: ${format(day.inputTokens)}\n${t('output')}: ${format(day.outputTokens)}\n${t('requests')}: ${day.requests}`} aria-pressed={selected === day.day} onClick={() => setSelected(day.day)} /> : <span key={`pad-${i}`} />)}
       </div></div>
       <div className="axis"><span>{first}</span><span>{last !== first ? last : null}</span></div>
       <div className="heat-legend"><span>{t('less')}</span>{[0, 1, 2, 3, 4].map(level => <i key={level} className={`level-${level}`} />)}<span>{t('more')}</span></div>
-      <p className="day-detail" aria-live="polite">{selection ? `${selection.day} · ${t('input')} ${formatTokens(selection.inputTokens)} · ${t('output')} ${formatTokens(selection.outputTokens)} · ${t('requests')} ${selection.requests}` : t('noSelection')}</p>
-      <p className="muted">{t('heatHint')}</p>
+      <p className="day-detail" aria-live="polite">{selection ? `${selection.day} · ${t('input')} ${formatTokens(selection.inputTokens)} · ${t('output')} ${formatTokens(selection.outputTokens)} · ${t('requests')} ${selection.requests}` : null}</p>
     </> : <>
       <div className="plot" role="img" aria-label={`${t(mode)} · ${label}`}>
         <svg viewBox="0 0 600 130" preserveAspectRatio="none">

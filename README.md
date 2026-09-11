@@ -1,7 +1,7 @@
 # DSH Token Usage
 
 
-The dashboard defaults to 30 days and offers a 90-day view. Every date has a square, including dates without recorded requests (white). Active days use four blue levels relative to the selected peak. Token counts use K / M / B; hover for exact integers or export JSON for full precision.
+The dashboard defaults to 90 days and offers a 30-day view. Every date has a square, including dates without recorded requests (white). Active days use four blue levels relative to the selected peak. Token counts use K / M / B; hover for exact integers or export JSON for full precision.
 English · [简体中文](README.zh-CN.md)
 
 **Know how many tokens each DSH model uses—and how many your local models generate.**
