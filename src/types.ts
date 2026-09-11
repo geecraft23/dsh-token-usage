@@ -10,6 +10,7 @@ export const querySchema = z.object({
   to: z.number().int().nonnegative().optional(),
   utcOffsetMinutes: z.number().int().min(-840).max(840).default(0),
   source: sourceSchema.optional(),
+  provider: z.string().min(1).optional(), model: z.string().min(1).optional(),
 }).strict().refine(q => q.from === undefined || q.to === undefined || q.from < q.to, 'from must precede to')
 export type Query = z.infer<typeof querySchema>
 export const classificationSchema = ruleSchema.required()

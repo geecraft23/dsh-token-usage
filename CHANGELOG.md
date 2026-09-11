@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 — 2026-09-11
+
+- Separate deployment (Local / Cloud) from token direction (Input / Output).
+- Replace asymmetric cards with consistent totals and deployment comparisons.
+- Add an activity calendar, weekly and cumulative views, peak daily usage and active-day insights.
+- Filter exact provider-model routes and export local/cloud vocabulary in JSON format version 2.
+- Preserve existing SQLite records and classifications; accept both new and legacy config labels.
+
 ## 0.1.0 — 2026-09-10
 
 - Persistent per-provider and per-model token accounting through DSH's LLM extension point.

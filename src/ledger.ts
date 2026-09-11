@@ -98,8 +98,9 @@ export class Ledger {
     }
     const rows = this.db.prepare(`SELECT provider, model, purpose,
       date(started_at / 1000, 'unixepoch', ?) AS day, ${aggregates}
-      FROM requests WHERE started_at >= ? AND started_at < ? GROUP BY provider, model, purpose, day`).all(
+      FROM requests WHERE started_at >= ? AND started_at < ? AND (? IS NULL OR provider = ?) AND (? IS NULL OR model = ?) GROUP BY provider, model, purpose, day`).all(
       `${query.utcOffsetMinutes} minutes`, query.from ?? 0, query.to ?? Number.MAX_SAFE_INTEGER,
+      query.provider ?? null, query.provider ?? null, query.model ?? null, query.model ?? null,
     )
     const totals = emptyTotals()
     const sources = new Map<Source, Totals>(['online', 'offline', 'unclassified'].map(s => [s as Source, emptyTotals()]))

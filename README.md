@@ -4,7 +4,7 @@ English · [简体中文](README.zh-CN.md)
 
 **Know how many tokens each DSH model uses—and how many your local models generate.**
 
-A standalone DeepSeek Harness plugin with persistent, cross-session accounting. Open **Settings → Token usage** to explore daily trends and usage by provider, model, and online/offline deployment.
+A standalone DeepSeek Harness plugin with persistent, cross-session accounting. Open **Settings → Token usage** to explore daily trends and usage by provider, model, and local/cloud deployment.
 
 ![Token usage dashboard](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/main/docs/images/overview.png)
 
@@ -15,29 +15,35 @@ A standalone DeepSeek Harness plugin with persistent, cross-session accounting. 
 Verified with **DSH 0.1.5-rc.1 / Cordis 4.0.2**, on Node.js 24.20.0. Supported Node engine: `^22.19.0 || >=24.0.0`. Other DSH versions are not yet verified.
 
 ```sh
-dsh plugin --profile web add @geecraft23/dsh-token-usage@0.1.0
+dsh plugin --profile web add @geecraft23/dsh-token-usage@0.2.0
 ```
 
 Restart the corresponding DSH process after active tasks finish, reload the browser, and open **Settings → Token usage**. No additional API key or database server is required.
 
 Install separately in other profiles by replacing `web`. Profiles sharing `DSH_HOME` share the default ledger. Tracking starts when the plugin loads; existing sessions are not backfilled.
 
+## What changed in 0.2
+
+Deployment and token direction are independent: choose **All / Local / Cloud**, then inspect **Total / Input / Output** using the same accounting rules. The redesigned dashboard adds an activity calendar, weekly and cumulative views, peak daily usage, active days, and longest active streak. Filter an exact provider-model route and export the selection.
+
+Existing ledger records and saved classifications are retained. Old `online` / `offline` configuration values remain accepted; new configuration can use `cloud` / `local`. JSON exports use `formatVersion: 2` and `cloud` / `local` source values. No database migration is required.
+
 ## Features
 
 - **Per-model accounting:** group by provider and model, keeping identical model names on different services separate.
-- **Online/offline classification:** assign a source to each route; changes apply to historical and future records. Unknown routes remain unclassified.
-- **Offline generation total:** prominently display output tokens from local or self-hosted models alongside input, cache, reasoning, and total usage.
+- **Local/cloud classification:** assign a source to each route; changes apply to historical and future records. Unknown routes remain unclassified.
+- **Independent dimensions:** compare local and cloud input, output and totals using the same columns.
 - **Trends and export:** 7-day, 30-day, all-time, and custom date ranges, source filters, and JSON export.
 - **Durable local storage:** SQLite survives restarts and session deletion. Missing usage, failures, and unfinished requests remain visible.
 - **Native settings page:** English and Chinese copy, with DSH light/dark theme support.
 
-![Offline model filter](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/main/docs/images/offline.png)
+![Local model filter](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/main/docs/images/local.png)
 
 ## Accounting and privacy
 
 Displayed input is uncached input + cache reads + cache writes. Total is input + output. Reasoning is already included in output. Repeated history is counted for each request, while cumulative streaming usage snapshots replace previous values for the same request.
 
-Requests without usage are marked as missing, not estimated. Totals represent reported usage, not a billing statement or remaining subscription quota. Online/offline is your classification: a local machine, LAN server, self-hosted remote service, or rented GPU may all be marked offline. Model names and URLs are not used to guess it.
+Requests without usage are marked as missing, not estimated. Totals represent reported usage, not a billing statement or remaining subscription quota. Local/cloud is your classification: a local machine, LAN server, self-hosted remote service, or rented GPU may all be marked local. Model names and URLs are not used to guess it.
 
 The ledger stores request IDs, timestamps, provider/model IDs, session IDs, purposes, status, and counters. It does not store prompts, answers, endpoint URLs, API keys, or cookies. The default file is `$DSH_HOME/token-usage/usage.sqlite`, or `~/.dsh/token-usage/usage.sqlite` when unset. There is no automatic cross-machine synchronization.
 
@@ -54,9 +60,9 @@ Add settings to your profile's `cordis.patch.yml`:
     busyTimeoutMs: 1000
     rules:
       - provider: deepseek
-        source: online
+        source: cloud
       - provider: your-self-hosted-provider
-        source: offline
+        source: local
 ```
 
 Rules match exact provider IDs; add `model` for a model-specific rule. A model rule overrides a provider rule, and classifications saved in the UI override both. Leave `databasePath` unset for the shared default. Use local storage, not a network filesystem; back up with SQLite tooling or stop writers first. Unsupported ledger versions and invalid configuration fail to load.
