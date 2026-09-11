@@ -30,4 +30,4 @@ A read-only snapshot of the local history and a consistent copy of its v1 ledger
 
 A separate Profile installed the packed 0.3.0 artifact, loaded its settings page and reopened the imported ledger; rescanning recognized all prior imports. The synthetic `tests/fixtures/history-demo.mjs` fixture creates 80 requests across two models through the public session persistence service. Its expected input is 3,512,000 (including 320,000 cached input), output 284,800, total 3,796,800. The screenshot `history-import.png` shows these synthetic records after import. The fixture requires `TOKEN_USAGE_DEMO=1` and must only run in an isolated profile with a separate session root and ledger.
 
-Registry installation of 0.3.0 has not been tested because this development version has not been published to npm. The 0.2 registry proof does not establish 0.3 registry availability.
+Registry installation is a separate post-publication gate: install the exact npm version into a fresh Profile, run the deterministic task, and verify the resulting ledger. The result is recorded in the corresponding GitHub Release; a local checkout or tarball test does not substitute for it.
