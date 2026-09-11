@@ -15,18 +15,30 @@ A standalone DeepSeek Harness plugin with persistent, cross-session accounting. 
 Verified with **DSH 0.1.5-rc.1 / Cordis 4.0.2**, on Node.js 24.20.0. Supported Node engine: `^22.19.0 || >=24.0.0`. Other DSH versions are not yet verified.
 
 ```sh
-dsh plugin --profile web add @geecraft23/dsh-token-usage@0.2.0
+dsh plugin --profile web add @geecraft23/dsh-token-usage@0.3.0
 ```
 
 Restart the corresponding DSH process after active tasks finish, reload the browser, and open **Settings → Token usage**. No additional API key or database server is required.
 
-Install separately in other profiles by replacing `web`. Profiles sharing `DSH_HOME` share the default ledger. Tracking starts when the plugin loads; existing sessions are not backfilled.
+Install separately in other profiles by replacing `web`. Profiles sharing `DSH_HOME` share the default ledger. Live tracking starts when the plugin loads. Import older recorded usage from **Import historical usage → Scan history → Import available records**.
+
+## Historical usage in 0.3
+
+Scan stored sessions, review the available input/output and overlap counts, then import. The scan covers all dates and models regardless of dashboard filters. After import, choose **View all time** to see the recovered activity. Repeated scans and imports retain existing counts; cancelling preserves completed records so you can scan again to continue. Local/cloud classifications also apply to imported routes.
+
+Only usage saved by DSH can be recovered. The coverage report lists missing usage, unreadable sessions, unresolved overlaps, inherited fork records, and title requests without saved response usage. Uncertain overlaps are skipped. Imported request dates use the earliest recorded stream chunk, or the compaction start time when available. This can differ from the original request start time.
+
+On first upgrade from ledger version 1, a consistent `.v1-backup-<id>.sqlite` file is saved beside the ledger before its atomic migration to version 2. Update all profiles sharing that ledger to 0.3 before restarting them; earlier plugin versions cannot reopen it. Restoring the backup also discards records collected after that backup.
+
+![Historical import with synthetic records](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/main/docs/images/history-import.png)
+
+See [history accounting and limits](docs/accounting.zh-CN.md#历史导入) and [validation](docs/validation.md).
 
 ## What changed in 0.2
 
 Deployment and token direction are independent: choose **All / Local / Cloud**, then inspect **Total / Input / Output** using the same accounting rules. The redesigned dashboard adds an activity calendar, weekly and cumulative views, peak daily usage, active days, and longest active streak. Filter an exact provider-model route and export the selection.
 
-Existing records and classifications are retained without a database migration. New configuration and JSON exports use `local` / `cloud`; exports carry `formatVersion: 2`. See [configuration compatibility](docs/accounting.zh-CN.md#配置兼容) when upgrading older configuration.
+The 0.2 dashboard retained existing records and classifications. New configuration and JSON exports use `local` / `cloud`; exports carry `formatVersion: 2`. See [configuration compatibility](docs/accounting.zh-CN.md#配置兼容) when upgrading older configuration.
 
 ## Features
 
@@ -50,7 +62,7 @@ These are independent dimensions. Local and cloud each have input, output, and t
 | Local | Tokens sent to self-managed models | Tokens returned by those models | Input + output |
 | Cloud | Tokens sent to hosted model services | Tokens returned by those services | Input + output |
 
-The calendar follows the selected period, deployment, model, and token metric. All-time and custom calendars show up to 366 days; totals and trends cover the full selection. Dates before tracking began have no records. Requests with unreported usage remain visible as activity, but their unknown token counts are not estimated.
+The calendar follows the selected period, deployment, model, and token metric. All-time and custom calendars show up to 366 days; totals and trends cover the full selection. Dates without recorded requests remain gray. Requests with unreported usage remain visible as activity, but their unknown token counts are not estimated.
 
 ## Accounting and privacy
 
@@ -58,7 +70,7 @@ Displayed input is uncached input + cache reads + cache writes. Total is input +
 
 Requests without usage are marked as missing, not estimated. Totals represent reported usage, not a billing statement or remaining subscription quota. Local/cloud is your classification: a local machine, LAN server, self-hosted remote service, or rented GPU may all be marked local. Model names and URLs are not used to guess it.
 
-The ledger stores request IDs, timestamps, provider/model IDs, session IDs, purposes, status, and counters. It does not store prompts, answers, endpoint URLs, API keys, or cookies. The default file is `$DSH_HOME/token-usage/usage.sqlite`, or `~/.dsh/token-usage/usage.sqlite` when unset. There is no automatic cross-machine synchronization.
+The ledger stores request IDs, timestamps, provider/model IDs, session IDs, purposes, status, counters, and history identity/counter fingerprints. It does not store prompts, answers, endpoint URLs, API keys, or cookies. The default file is `$DSH_HOME/token-usage/usage.sqlite`, or `~/.dsh/token-usage/usage.sqlite` when unset. There is no automatic cross-machine synchronization.
 
 Failed and cancelled calls retain usage already reported. Calls made by external agents need the plugin installed in their own DSH process. Simulated providers are also observed; keep tests in an isolated `DSH_HOME`.
 

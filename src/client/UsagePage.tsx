@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { reportSchema, type Query, type Report, type Source } from '../types.js'
 import type { Translate } from './locales.js'
 import { TokenValue } from './TokenValue.js'
+import { HistoryPanel } from './HistoryPanel.js'
 import { Activity } from './Activity.js'
 import { dailyRows, insights } from './activity-data.js'
 import { css } from './styles.js'
@@ -38,6 +39,7 @@ export function exportUsage(query: Query, report: Report): string {
 export function UsagePage({ t, call }: UsagePageProps) {
   const [range, setRange] = useState('quarter'), [source, setSource] = useState('all')
   const [from, setFrom] = useState(dateValue(new Date())), [to, setTo] = useState(dateValue(new Date()))
+  const [historyOpen, setHistoryOpen] = useState(false)
   const [route, setRoute] = useState('all')
   const [catalog, setCatalog] = useState<Report['models']>([])
   const query = (): Query => ({ ...makeQuery(range, source, from, to), ...(route === 'all' ? {} : JSON.parse(route) as { provider: string; model: string }) })
@@ -89,8 +91,10 @@ export function UsagePage({ t, call }: UsagePageProps) {
       </select>
       <button onClick={() => void load()} disabled={loading}>{t('refresh')}</button>
       <button onClick={download} disabled={!report}>{t('export')}</button>
+      <button aria-expanded={historyOpen} onClick={() => setHistoryOpen(!historyOpen)}>{t('historyTitle')}</button>
       {saved && <span className="status" role="status">{t('saved')}</span>}
     </div>
+    {historyOpen && <HistoryPanel t={t} call={call} onImported={() => void load()} onAllTime={() => { setRange('allTime'); setHistoryOpen(false) }} />}
     {range === 'custom' && <div className="dates"><label>{t('from')} <input type="date" value={from} onChange={e => { setReport(null); setFrom(e.target.value) }} /></label><label>{t('to')} <input type="date" value={to} onChange={e => { setReport(null); setTo(e.target.value) }} /></label></div>}
     {error && <p className="notice" role="alert">{error}</p>}
     {report?.storageError && <p className="notice" role="alert">{t('storageError')}</p>}
@@ -123,7 +127,7 @@ export function UsagePage({ t, call }: UsagePageProps) {
       </>}
       <details><summary>{t('details')}</summary><p>{t('subtitle')}</p><p>{t('periodHint')}</p><p>{t('heatHint')}</p><p>{t('localHint')}</p><div className="coverage"><span>{number(report.totals.requests)} {t('requests')}</span><span>{number(report.totals.reportedRequests)} {t('reported')}</span><span>{number(report.totals.missingRequests)} {t('missing')}</span><span>{number(report.totals.openRequests)} {t('open')}</span><span>{number(report.totals.failedRequests)} {t('failed')}</span>{report.totals.invalidRequests > 0 && <span>{number(report.totals.invalidRequests)} {t('invalid')}</span>}</div>
       <p className="muted">{t('since')} {new Date(report.trackingSince).toLocaleString()} · {t('timezone')} UTC{new Date().getTimezoneOffset() > 0 ? '−' : '+'}{Math.abs(new Date().getTimezoneOffset()) / 60}</p>
-      <p>{t('accounting')}</p><p>{t('missingHint')}</p><p>{t('scope')}</p><p>{t('auxiliary')}</p><p>{t('cached')} {report.totals.cacheReadReports ? <TokenValue value={report.totals.cacheReadTokens} /> : '—'} · {t('cacheWrite')} {report.totals.cacheWriteReports ? <TokenValue value={report.totals.cacheWriteTokens} /> : '—'} · {t('reasoning')} {report.totals.reasoningReports ? <TokenValue value={report.totals.reasoningTokens} /> : '—'}</p></details>
+      <p>{t('historyCoverageSince')} {report.firstRequestAt === null ? '—' : new Date(report.firstRequestAt).toLocaleString()}</p><p>{t('accounting')}</p><p>{t('missingHint')}</p><p>{t('scope')}</p><p>{t('auxiliary')}</p><p>{t('cached')} {report.totals.cacheReadReports ? <TokenValue value={report.totals.cacheReadTokens} /> : '—'} · {t('cacheWrite')} {report.totals.cacheWriteReports ? <TokenValue value={report.totals.cacheWriteTokens} /> : '—'} · {t('reasoning')} {report.totals.reasoningReports ? <TokenValue value={report.totals.reasoningTokens} /> : '—'}</p></details>
     </>}
   </section>
 }

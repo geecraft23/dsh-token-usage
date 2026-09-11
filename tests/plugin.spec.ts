@@ -30,6 +30,11 @@ it('collects through the actual 0.1.5 LlmRuntime and serves the authenticated Co
   expect(report.totals).toMatchObject({ requests: 1, totalTokens: 30 })
   expect(report.sources.find(r => r.source === 'offline')?.totals.outputTokens).toBe(20)
   expect(report.purposes[0]?.purpose).toBe('session-title')
+  const historyRoute = routes.get('/api/token-usage/history')!
+  const historyStatus = await historyRoute.fetch(new Request('http://localhost/api/token-usage/history', { method: 'POST', body: '{"action":"status"}' }))
+  expect(await historyStatus.json()).toMatchObject({ phase: 'unavailable' })
+  const noSource = await historyRoute.fetch(new Request('http://localhost/api/token-usage/history', { method: 'POST', body: '{"action":"scan"}' }))
+  expect(noSource.status).toBe(400)
   const bad = await routes.get('/api/token-usage/classify')!.fetch(new Request('http://localhost/api/token-usage/classify', { method: 'POST', body: JSON.stringify({ provider: 'spark', model: 'qwen', source: 'bad' }) }))
   expect(bad.ok).toBe(false)
   await fiber.dispose()

@@ -1,4 +1,6 @@
 /** Durable request ledger; WAL coordinates multiple DSH processes sharing one file. */
+import { randomUUID } from 'node:crypto'
+import type { HistoricalAttempt } from './history-types.js'
 import { DatabaseSync } from 'node:sqlite'
 import { mkdirSync } from 'node:fs'
 import { dirname, isAbsolute } from 'node:path'
@@ -43,9 +45,10 @@ export class Ledger {
     this.db = new DatabaseSync(path)
     try {
       this.db.exec(`PRAGMA busy_timeout = ${busyTimeoutMs}; PRAGMA journal_mode = WAL;`)
-      this.db.exec('BEGIN IMMEDIATE')
       const version = this.db.prepare('PRAGMA user_version').get()?.user_version
-      if (version !== 0 && version !== 1) throw new Error(`token-usage: unsupported ledger version ${version}`)
+      if (version !== 0 && version !== 1 && version !== 2) throw new Error(`token-usage: unsupported ledger version ${version}`)
+      if (version === 1 && path !== ':memory:') this.db.exec(`VACUUM INTO '${`${path}.v1-backup-${randomUUID()}.sqlite`.replaceAll("'", "''")}'`)
+      this.db.exec('BEGIN IMMEDIATE')
       this.db.exec(`CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value INTEGER NOT NULL);
         CREATE TABLE IF NOT EXISTS requests (
           id TEXT PRIMARY KEY, started_at INTEGER NOT NULL, updated_at INTEGER NOT NULL,
@@ -53,9 +56,14 @@ export class Ledger {
           status TEXT NOT NULL, input INTEGER, output INTEGER, cache_read INTEGER, cache_write INTEGER,
           reasoning INTEGER, provider_total INTEGER, invalid_usage INTEGER NOT NULL);
         CREATE INDEX IF NOT EXISTS requests_started ON requests(started_at);
+        CREATE INDEX IF NOT EXISTS requests_history_match ON requests(session_id, provider, model, purpose, updated_at);
         CREATE TABLE IF NOT EXISTS classifications (
           provider TEXT NOT NULL, model TEXT NOT NULL, source TEXT NOT NULL,
-          PRIMARY KEY(provider, model)); PRAGMA user_version = 1;`)
+          PRIMARY KEY(provider, model));
+        CREATE TABLE IF NOT EXISTS history_links (
+          history_id TEXT PRIMARY KEY, request_id TEXT NOT NULL UNIQUE, fingerprint TEXT NOT NULL,
+          origin TEXT NOT NULL CHECK(origin IN ('imported', 'live')));
+        PRAGMA user_version = 2;`)
       this.db.prepare("INSERT OR IGNORE INTO metadata VALUES ('tracking_since', ?)").run(Date.now())
       this.db.exec('COMMIT')
       this.trackingSince = Number(this.db.prepare("SELECT value FROM metadata WHERE key = 'tracking_since'").get()?.value)
@@ -77,6 +85,34 @@ export class Ledger {
       u?.inputTokens ?? null, u?.outputTokens ?? null, u?.cacheReadTokens ?? null,
       u?.cacheWriteTokens ?? null, u?.reasoningTokens ?? null, u?.totalTokens ?? null, Number(a.invalidUsage),
     )
+  }
+
+  /** Resolve stable history identity, then conservatively match legacy live intervals and full counters. */
+  historyDecision(a: HistoricalAttempt, tolerance: number): { kind: 'insert' | 'existing' | 'conflict' } | { kind: 'link'; requestId: string } {
+    const known = this.db.prepare('SELECT fingerprint FROM history_links WHERE history_id = ?').get(a.historyId)
+    if (known) return { kind: known.fingerprint === a.fingerprint ? 'existing' : 'conflict' }
+    const rows = this.db.prepare(`SELECT r.*, h.history_id FROM requests r LEFT JOIN history_links h ON h.request_id = r.id
+      WHERE (h.origin IS NULL OR h.origin = 'live') AND r.session_id = ? AND r.provider = ? AND r.model = ? AND r.purpose = ?
+      AND r.started_at <= ? AND r.updated_at >= ?`).all(a.sessionId, a.provider, a.model, a.purpose, a.updatedAt + tolerance, a.startedAt - tolerance)
+    if (rows.length === 0) return { kind: 'insert' }
+    const u = a.usage
+    const matches = rows.filter(r => r.status !== 'open' && Math.abs(Number(r.updated_at) - a.updatedAt) <= tolerance &&
+      r.input === (u?.inputTokens ?? null) && r.output === (u?.outputTokens ?? null) && r.cache_read === (u?.cacheReadTokens ?? null) && r.cache_write === (u?.cacheWriteTokens ?? null) && r.reasoning === (u?.reasoningTokens ?? null))
+    if (matches.length !== 1 || matches[0]!.history_id !== null) return { kind: 'conflict' }
+    return { kind: 'link', requestId: String(matches[0]!.id) }
+  }
+
+  /** Recheck inside the write transaction so other profiles cannot double-import a request. */
+  importHistory(a: HistoricalAttempt, tolerance: number): 'insert' | 'existing' | 'conflict' | 'link' {
+    this.db.exec('BEGIN IMMEDIATE')
+    try {
+      const decision = this.historyDecision(a, tolerance)
+      if (decision.kind === 'insert' || decision.kind === 'link') {
+        if (decision.kind === 'insert') this.put(a)
+        this.db.prepare('INSERT INTO history_links VALUES (?, ?, ?, ?)').run(a.historyId, decision.kind === 'link' ? decision.requestId : a.id, a.fingerprint, decision.kind === 'link' ? 'live' : 'imported')
+      }
+      this.db.exec('COMMIT'); return decision.kind
+    } catch (error) { this.db.exec('ROLLBACK'); throw error }
   }
 
   /** Persist an exact route classification; changes apply to historical and future totals. */

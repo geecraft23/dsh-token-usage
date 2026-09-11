@@ -37,4 +37,5 @@ export const css = `
 .dsh-usage .toolbar select{max-width:100%;min-width:0}.dsh-usage .toolbar select[aria-label="模型"],.dsh-usage .toolbar select[aria-label="Model"]{max-width:180px}
 @media(max-width:500px){.dsh-usage .insights-strip{grid-template-columns:1fr 1fr;gap:16px}.dsh-usage .totals-strip strong{font-size:18px}}
 @media(prefers-reduced-motion:reduce){.dsh-usage .calendar .day{transition:none}.dsh-usage .calendar .day:hover{transform:none}}
+.dsh-usage .history-panel{border:1px solid #8883;border-radius:12px;padding:16px;margin:16px 0;font-size:12px}.dsh-usage .history-panel h3{margin:0 0 6px}.dsh-usage .history-actions,.dsh-usage .history-counts{display:flex;flex-wrap:wrap;gap:8px 16px;margin:12px 0}.dsh-usage .history-panel .muted{overflow-wrap:anywhere}
 `
