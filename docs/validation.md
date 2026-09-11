@@ -1,6 +1,6 @@
 # Validation
 
-Target: DSH 0.1.5-rc.1, Cordis 4.0.2, Node.js 24.20.0, pnpm 11.7.0, macOS. Date: 2026-09-10.
+Target: DSH 0.1.5-rc.1, Cordis 4.0.2, Node.js 24.20.0, pnpm 11.7.0, macOS. Date: 2026-09-11.
 
 ## Automated checks
 
@@ -19,3 +19,5 @@ Screenshots use synthetic records in a separate test ledger to show trends and f
 New checks cover independent deployment and token-direction selection, exact provider-model filtering, empty intersections, local/cloud export vocabulary, legacy configuration support, year-boundary streaks, leap days, fixed-offset date boundaries, missing weeks and the 366-day calendar limit. Activity days count observed requests, including requests without usage. Peaks and streaks follow the selected period and route. The calendar includes zero-activity days; weekly views retain empty weeks. Cumulative values use all measured days in the selection. Longest chat duration and plugin/skill usage are not derived from token records.
 
 The default 90-day and optional 30-day views retain every date even with no requests. UI tests cover relative color levels and K/M/B formatting. On 2026-09-11 the installed Web profile rendered 30 cells (29 empty), then 90 cells (89 empty), with white inactive dates and 2.49M total tokens. Exact-value tooltips and numeric JSON exports retain full precision.
+
+The 0.2.0 release screenshots were captured from the current plugin in an isolated DSH Web profile using synthetic records. They show the 90-day activity grid with filled rounded tiles, compact counters, local/cloud totals, and local model input/output rows. Both READMEs and the npm description use local/cloud terminology; legacy field names are documented only under configuration compatibility.

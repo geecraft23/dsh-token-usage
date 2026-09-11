@@ -36,6 +36,10 @@ DSH 的 `inputTokens` 是**未缓存输入**。本插件展示的输入＝未缓
 
 规则使用精确 provider ID，可增加 `model` 只匹配一个模型。精确模型规则优先于 provider 规则，设置页保存的分类优先于规则。未知配置和不支持的账本版本会拒绝加载。
 
+## 配置兼容
+
+新配置使用 `source: local`（本地）、`source: cloud`（云端）或 `source: unclassified`（未分类）。旧配置的 `offline` 对应本地，`online` 对应云端，仍可加载。账本内部保留旧标识以延续历史记录；页面统一显示本地／云端，JSON 导出使用新标识与 `formatVersion: 2`。这些兼容字段不表示输入或输出方向。
+
 ## 开发
 
 ```sh

@@ -1,16 +1,14 @@
 # DSH Token Usage
 
-
-The dashboard defaults to 90 days and offers a 30-day view. Every date has a square, including dates without recorded requests (soft gray-white). Active days use four blue levels relative to the selected peak. Token counts use K / M / B; hover for exact integers or export JSON for full precision.
 English · [简体中文](README.zh-CN.md)
 
-**Know how many tokens each DSH model uses—and how many your local models generate.**
+**See input and output token usage for every model, across local and cloud services.**
 
-A standalone DeepSeek Harness plugin with persistent, cross-session accounting. Open **Settings → Token usage** to explore daily trends and usage by provider, model, and local/cloud deployment.
+A standalone DeepSeek Harness plugin with persistent, cross-session accounting. Open **Settings → Token usage** for activity, totals, and a breakdown by model and deployment.
 
-![Token usage dashboard](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/main/docs/images/overview.png)
+![Token activity and input/output overview](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/main/docs/images/overview.png)
 
-> Screenshots show demonstration data in an isolated DSH instance, not measured model inference.
+> Screenshots use synthetic records in an isolated DSH instance. They demonstrate the interface, not measured inference.
 
 ## Install
 
@@ -28,18 +26,31 @@ Install separately in other profiles by replacing `web`. Profiles sharing `DSH_H
 
 Deployment and token direction are independent: choose **All / Local / Cloud**, then inspect **Total / Input / Output** using the same accounting rules. The redesigned dashboard adds an activity calendar, weekly and cumulative views, peak daily usage, active days, and longest active streak. Filter an exact provider-model route and export the selection.
 
-Existing ledger records and saved classifications are retained. Old `online` / `offline` configuration values remain accepted; new configuration can use `cloud` / `local`. JSON exports use `formatVersion: 2` and `cloud` / `local` source values. No database migration is required.
+Existing records and classifications are retained without a database migration. New configuration and JSON exports use `local` / `cloud`; exports carry `formatVersion: 2`. See [configuration compatibility](docs/accounting.zh-CN.md#配置兼容) when upgrading older configuration.
 
 ## Features
 
 - **Per-model accounting:** group by provider and model, keeping identical model names on different services separate.
 - **Local/cloud classification:** assign a source to each route; changes apply to historical and future records. Unknown routes remain unclassified.
 - **Independent dimensions:** compare local and cloud input, output and totals using the same columns.
-- **Trends and export:** 7-day, 30-day, all-time, and custom date ranges, source filters, and JSON export.
+- **Activity first:** 90 days by default, with 30-day, all-time, and custom ranges. Every date has a rounded tile: soft gray means no recorded requests; four blue levels show usage relative to the selected peak.
+- **Readable numbers:** K for thousands, M from one million, B from one billion. Hover for exact counts; JSON exports keep complete integers.
+- **Trends and export:** daily, weekly, and cumulative views; filter deployment and model independently, then export the selection.
 - **Durable local storage:** SQLite survives restarts and session deletion. Missing usage, failures, and unfinished requests remain visible.
 - **Native settings page:** English and Chinese copy, with DSH light/dark theme support.
 
 ![Local model filter](https://raw.githubusercontent.com/geecraft23/dsh-token-usage/main/docs/images/local.png)
+
+## Local / cloud and input / output
+
+These are independent dimensions. Local and cloud each have input, output, and total tokens:
+
+| Deployment | Input | Output | Total |
+| --- | --- | --- | --- |
+| Local | Tokens sent to self-managed models | Tokens returned by those models | Input + output |
+| Cloud | Tokens sent to hosted model services | Tokens returned by those services | Input + output |
+
+The calendar follows the selected period, deployment, model, and token metric. All-time and custom calendars show up to 366 days; totals and trends cover the full selection. Dates before tracking began have no records. Requests with unreported usage remain visible as activity, but their unknown token counts are not estimated.
 
 ## Accounting and privacy
 
