@@ -1,4 +1,5 @@
 /** Accessible activity calendar with independent input/output and time-view controls. */
+import { TokenValue, formatTokens } from './TokenValue.js'
 import { useState } from 'react'
 import type { Query, Report } from '../types.js'
 import type { Translate } from './locales.js'
@@ -8,9 +9,9 @@ export function Activity({ report, query, t }: { report: Report; query: Query; t
   const [mode, setMode] = useState<'daily' | 'weekly' | 'cumulative'>('daily')
   const [metric, setMetric] = useState<Metric>('totalTokens')
   const [selected, setSelected] = useState<string | null>(null)
-  const rows = dailyRows(report), cells = calendar(rows, query, report.createdAt)
+  const rows = dailyRows(report), cells = calendar(rows, query, report.createdAt).filter((day): day is Day => day !== null)
   const selection = cells.find((d): d is Day => d?.day === selected)
-  const max = Math.max(1, ...cells.map(d => d?.[metric] ?? 0))
+  const max = Math.max(1, ...rows.map(d => d[metric]))
   const points = series(rows, metric, mode === 'weekly' ? 'weekly' : 'cumulative')
   const peak = Math.max(1, ...points.map(p => p.value))
   const first = cells.find(Boolean)?.day, last = cells.findLast(Boolean)?.day
@@ -21,12 +22,12 @@ export function Activity({ report, query, t }: { report: Report; query: Query; t
     </select></div>
     <div className="view-tabs" role="group" aria-label={t('activity')}>{(['daily', 'weekly', 'cumulative'] as const).map(key => <button key={key} aria-pressed={mode === key} onClick={() => setMode(key)}>{t(key)}</button>)}</div>
     {mode === 'daily' ? <>
-      <div className="calendar-scroll"><div className="calendar" style={{ gridTemplateColumns: `repeat(${Math.max(1, cells.length / 7)}, 8px)` }}>
-        {cells.map((day, i) => day ? <button key={day.day} className={`day level-${day[metric] === 0 ? 0 : Math.min(4, Math.ceil(day[metric] / max * 4))}`} aria-label={`${day.day} · ${label} ${format(day[metric])} · ${t('requests')} ${day.requests}`} title={`${day.day}\n${t('input')}: ${format(day.inputTokens)}\n${t('output')}: ${format(day.outputTokens)}\n${t('requests')}: ${day.requests}`} aria-pressed={selected === day.day} onClick={() => setSelected(day.day)} /> : <span key={`pad-${i}`} />)}
+      <div className="calendar-scroll"><div className="calendar" style={{ gridTemplateColumns: `repeat(${cells.length <= 90 ? 15 : 30}, minmax(0, 1fr))` }}>
+        {cells.map((day, i) => day ? <button key={day.day} className={`day level-${day.requests === 0 ? 0 : Math.max(1, Math.min(4, Math.ceil(day[metric] / max * 4)))}`} aria-label={`${day.day} · ${label} ${format(day[metric])} · ${t('requests')} ${day.requests}`} title={`${day.day}\n${t('input')}: ${format(day.inputTokens)}\n${t('output')}: ${format(day.outputTokens)}\n${t('requests')}: ${day.requests}`} aria-pressed={selected === day.day} onClick={() => setSelected(day.day)} /> : <span key={`pad-${i}`} />)}
       </div></div>
       <div className="axis"><span>{first}</span><span>{last !== first ? last : null}</span></div>
       <div className="heat-legend"><span>{t('less')}</span>{[0, 1, 2, 3, 4].map(level => <i key={level} className={`level-${level}`} />)}<span>{t('more')}</span></div>
-      <p className="day-detail" aria-live="polite">{selection ? `${selection.day} · ${t('input')} ${format(selection.inputTokens)} · ${t('output')} ${format(selection.outputTokens)} · ${t('requests')} ${selection.requests}` : t('noSelection')}</p>
+      <p className="day-detail" aria-live="polite">{selection ? `${selection.day} · ${t('input')} ${formatTokens(selection.inputTokens)} · ${t('output')} ${formatTokens(selection.outputTokens)} · ${t('requests')} ${selection.requests}` : t('noSelection')}</p>
       <p className="muted">{t('heatHint')}</p>
     </> : <>
       <div className="plot" role="img" aria-label={`${t(mode)} · ${label}`}>
@@ -35,7 +36,7 @@ export function Activity({ report, query, t }: { report: Report; query: Query; t
           {mode === 'cumulative' && points.length === 1 && <circle cx="300" cy="10" r="3" />}
         </svg>
       </div><div className="axis"><span>{points[0]?.label}</span><span>{points.at(-1)?.label}</span></div>
-      <details><summary>{t('dataDetails')}</summary>{points.map(p => <div key={p.label} className="series-row"><span>{p.label}</span><span>{format(p.value)}</span></div>)}</details>
+      <details><summary>{t('dataDetails')}</summary>{points.map(p => <div key={p.label} className="series-row"><span>{p.label}</span><TokenValue value={p.value} /></div>)}</details>
     </>}
   </div>
 }

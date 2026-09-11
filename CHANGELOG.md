@@ -2,6 +2,7 @@
 
 ## 0.2.0 — 2026-09-11
 
+- Default to a complete 30-day activity grid, add 90 days, retain empty days in white, and format token counts with K/M/B and exact-value tooltips.
 - Separate deployment (Local / Cloud) from token direction (Input / Output).
 - Replace asymmetric cards with consistent totals and deployment comparisons.
 - Add an activity calendar, weekly and cumulative views, peak daily usage and active-day insights.

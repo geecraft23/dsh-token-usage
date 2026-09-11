@@ -1,14 +1,14 @@
 /** Settings copy, owned by the plugin rather than the DSH shell. */
 export const en = {
   nav: 'Token usage', title: 'Token activity', subtitle: 'Cumulative model requests across sessions on this DSH host.',
-  week: '7 days', month: '30 days', allTime: 'All time', custom: 'Custom', from: 'From', to: 'Through',
+  week: '7 days', month: '30 days', quarter: '90 days', allTime: 'All time', custom: 'Custom', from: 'From', to: 'Through',
   all: 'All deployments', online: 'Cloud', offline: 'Local', unclassified: 'Unclassified',
   total: 'Total tokens', input: 'Input', output: 'Output', cached: 'Cache read', cacheWrite: 'Cache write',
   dataDetails: 'Data details', period: 'Period', allModels: 'All models', metric: 'Token metric', daily: 'Daily', weekly: 'Weekly', cumulative: 'Cumulative',
   activity: 'Token activity', peak: 'Peak daily tokens', activeDays: 'Active days', streak: 'Longest active streak', days: 'days',
   deployments: 'By deployment', periodHint: 'All figures follow the selected period, deployment and model.',
   localHint: 'Local includes your own hardware and self-managed inference. Cloud means hosted model services. Existing classifications are retained; adjust rented or remote services as needed.',
-  heatHint: 'Calendar shows at most the latest 366 days in the selected period. Totals and trends cover the full selection. Blank dates before tracking began do not imply zero usage.',
+  heatHint: 'One square per day. White means no recorded requests; darker colors mean more tokens relative to the peak in this selection. Defaults to 30 days; choose 90 days for a longer view. All-time and custom calendars show at most 366 days. Dates before tracking began have no records.',
   less: 'Less', more: 'More', selection: 'Selected day', selectedTokens: 'Selected tokens', totalColumn: 'Total',
   noSelection: 'Select a day to see its input, output and request count.',
   requests: 'Requests', reported: 'with usage', missing: 'without usage', open: 'unfinished', failed: 'failed / cancelled',
@@ -26,14 +26,14 @@ export const en = {
 }
 export const zh: Record<keyof typeof en, string> = {
   nav: 'Token 用量', title: 'Token 用量', subtitle: '跨会话累计这台 DSH 主机的模型请求用量。',
-  week: '近 7 天', month: '近 30 天', allTime: '全部时间', custom: '自选日期', from: '开始', to: '截至',
+  week: '近 7 天', month: '近 30 天', quarter: '近 90 天', allTime: '全部时间', custom: '自选日期', from: '开始', to: '截至',
   all: '全部位置', online: '云端', offline: '本地', unclassified: '未分类',
   total: '累计 Token', input: '输入', output: '输出', cached: '缓存读取', cacheWrite: '缓存写入',
   dataDetails: '数据明细', period: '时间范围', allModels: '全部模型', metric: 'Token 指标', daily: '每日', weekly: '每周', cumulative: '累计',
   activity: 'Token 活动', peak: '单日峰值 Token', activeDays: '活跃天数', streak: '最长连续活跃', days: '天',
   deployments: '按部署位置', periodHint: '以下数字均对应所选时间、部署位置和模型。',
   localHint: '本地包括自有硬件和自行管理的推理服务；云端指托管模型服务。已有分类已保留，租用或远程服务可按实际情况调整。',
-  heatHint: '日历最多展示所选范围内最近 366 天；总量和趋势覆盖完整筛选范围。启用前的空白日期不代表零用量。',
+  heatHint: '每格代表一天。白色表示没有请求记录，颜色按所选范围的最高用量分级加深。默认近 30 天，也可切换近 90 天；全部时间和自选日期最多展示 366 天。启用前的日期没有记录。',
   less: '少', more: '多', selection: '所选日期', selectedTokens: '当前指标', totalColumn: '总量',
   noSelection: '选择日期，查看当天的输入、输出和请求数。',
   requests: '请求数', reported: '已返回用量', missing: '未返回用量', open: '未结束', failed: '失败／取消',
